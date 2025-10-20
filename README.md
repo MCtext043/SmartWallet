@@ -96,7 +96,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 - `POST /transactions` - Создать транзакцию
 
 ### Ассистент
-- `GET /assistant/recommendations` - Получить рекомендации
+- `GET /assistant/recommendations` - Получить персонализированные рекомендации
 - `POST /assistant/chat` - Чат с AI ассистентом
 
 ### Кэшбэк
@@ -210,6 +210,7 @@ curl -X POST "http://localhost:8000/assistant/chat" \
 │   └── cashback.py       # Кэшбэк
 ├── requirements.txt       # Зависимости
 ├── test_chat.py          # Тест чата с ассистентом
+├── test_recommendations.py # Тест персонализированных рекомендаций
 ├── chat_client.py        # Клиент для чата
 └── README.md             # Документация
 ```
@@ -229,9 +230,14 @@ python init_db.py
 - Тестовые транзакции
 - Рекомендации
 
-### Тестирование чата с ассистентом
+### Тестирование ассистента
 
-#### Автоматический тест:
+#### Тест персонализированных рекомендаций:
+```bash
+python test_recommendations.py
+```
+
+#### Тест чата с AI:
 ```bash
 python test_chat.py
 ```
