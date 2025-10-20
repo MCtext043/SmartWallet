@@ -1,6 +1,7 @@
 """
 SmartWallet API Server
 Простой запуск сервера для работы в сети
+База данных: SQLite (не требует установки)
 """
 import uvicorn
 import socket

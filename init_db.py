@@ -1,5 +1,6 @@
 """
 Скрипт для инициализации базы данных SQLite с тестовыми данными
+SQLite не требует установки - встроена в Python!
 """
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
@@ -7,9 +8,9 @@ from models import Base, User, Card, Transaction, Recommendation
 from auth import get_password_hash
 
 def create_tables():
-    """Создает все таблицы в базе данных"""
+    """Создает все таблицы в базе данных SQLite"""
     Base.metadata.create_all(bind=engine)
-    print("✅ Таблицы созданы")
+    print("✅ Таблицы SQLite созданы")
 
 def create_test_data():
     """Создает тестовые данные"""
@@ -102,10 +103,11 @@ def create_test_data():
         db.commit()
         print("✅ Созданы тестовые рекомендации")
         
-        print("\n🎉 База данных успешно инициализирована!")
+        print("\n🎉 База данных SQLite успешно инициализирована!")
         print("📱 Тестовый пользователь:")
         print("   Телефон: +79001234567")
         print("   Пароль: password123")
+        print("🗄️ База данных: smartwallet.db (SQLite)")
         
     except Exception as e:
         print(f"❌ Ошибка при создании тестовых данных: {e}")
@@ -114,6 +116,6 @@ def create_test_data():
         db.close()
 
 if __name__ == "__main__":
-    print("🚀 Инициализация базы данных SmartWallet...")
+    print("🚀 Инициализация базы данных SmartWallet (SQLite)...")
     create_tables()
     create_test_data()

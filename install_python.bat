@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo    Установка Python для SmartWallet
+echo    Установка Python для SmartWallet (SQLite)
 echo ========================================
 echo.
 

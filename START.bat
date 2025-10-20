@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo    SmartWallet API - Запуск
+echo    SmartWallet API - Запуск (SQLite)
 echo ========================================
 echo.
 

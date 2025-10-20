@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo    SmartWallet API - Установщик
+echo    SmartWallet API - Установщик (SQLite)
 echo ========================================
 echo.
 
@@ -31,8 +31,8 @@ if errorlevel 1 (
 echo ✅ Python найден
 echo.
 
-echo 📦 Установка зависимостей...
-pip install fastapi uvicorn sqlalchemy python-jose[cryptography] passlib[bcrypt] python-multipart pydantic pydantic-settings python-dotenv
+echo 📦 Установка зависимостей для SQLite...
+pip install fastapi uvicorn sqlalchemy python-jose[cryptography] passlib[bcrypt] python-multipart pydantic pydantic-settings python-dotenv requests
 if errorlevel 1 (
     echo ❌ Ошибка установки зависимостей
     pause
@@ -61,7 +61,7 @@ echo.
 echo 🎉 Установка завершена!
 echo.
 echo ========================================
-echo    Готово к запуску!
+echo    Готово к запуску! (SQLite)
 echo ========================================
 echo.
 echo 📱 Для запуска используйте:

@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo    Создание пакета для распространения
+echo    Создание пакета SmartWallet (SQLite)
 echo ========================================
 echo.
 
-echo 📦 Создание архива SmartWallet...
+echo 📦 Создание архива SmartWallet (SQLite)...
 
 REM Создаем папку для архива
 if exist "SmartWallet_Package" rmdir /s /q "SmartWallet_Package"
@@ -20,6 +20,8 @@ copy "schemas.py" "SmartWallet_Package\"
 copy "auth.py" "SmartWallet_Package\"
 copy "init_db.py" "SmartWallet_Package\"
 copy "run_server.py" "SmartWallet_Package\"
+copy "test_chat.py" "SmartWallet_Package\"
+copy "chat_client.py" "SmartWallet_Package\"
 copy "requirements.txt" "SmartWallet_Package\"
 
 REM Копируем папку routers

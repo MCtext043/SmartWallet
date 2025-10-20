@@ -3,7 +3,7 @@ chcp 65001 >nul
 title SmartWallet API
 
 echo ========================================
-echo    🚀 SMARTWALLET API
+echo    🚀 SMARTWALLET API (SQLite)
 echo ========================================
 echo.
 
@@ -25,9 +25,9 @@ if errorlevel 1 (
     exit /b 0
 )
 
-REM Проверяем базу данных
+REM Проверяем базу данных SQLite
 if not exist "smartwallet.db" (
-    echo 🗄️ Создание базы данных...
+    echo 🗄️ Создание базы данных SQLite...
     python init_db.py
 )
 
