@@ -64,9 +64,10 @@ class SmartWalletChatClient:
                 if not message:
                     continue
                 
-                print("🤖 Ассистент: ", end="", flush=True)
+                print("🤖 Ассистент:")
                 reply = self.chat(message)
                 print(reply)
+                print("-" * 40)
                 
             except KeyboardInterrupt:
                 print("\n👋 До свидания!")

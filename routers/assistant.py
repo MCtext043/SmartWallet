@@ -20,6 +20,37 @@ class ChatResponse(BaseModel):
     reply: str
 
 
+def clean_giga_response(response_text: str) -> str:
+    """Очищает и форматирует ответ от GigaChat для корректного отображения"""
+    try:
+        # Пытаемся распарсить как JSON
+        import json
+        giga_data = json.loads(response_text)
+        
+        if isinstance(giga_data, dict):
+            if "content" in giga_data:
+                text = giga_data["content"]
+            else:
+                text = response_text
+        else:
+            text = response_text
+    except (ValueError, TypeError):
+        # Если не JSON, используем текст как есть
+        text = response_text
+    
+    # Очищаем и форматируем текст
+    text = text.strip()
+    
+    # Обрабатываем escape-последовательности
+    text = text.replace('\\n', '\n')     # Переносы строк
+    text = text.replace('\\"', '"')      # Кавычки
+    text = text.replace('\\/', '/')      # Слэши
+    text = text.replace('\\\\', '\\')    # Обратные слэши
+    text = text.replace('\\t', '\t')     # Табуляция
+    
+    return text
+
+
 def get_user_context(current_user: User, db: Session) -> str:
     """Получает контекст пользователя для ассистента"""
     # Получаем карты пользователя
@@ -90,7 +121,9 @@ def chat_with_assistant(
         )
         
         if response.status_code == 200:
-            return ChatResponse(reply=response.text.strip())
+            # Очищаем и форматируем ответ от GigaChat
+            clean_reply = clean_giga_response(response.text)
+            return ChatResponse(reply=clean_reply)
         else:
             return ChatResponse(
                 reply=f"Извините, произошла ошибка при обращении к ассистенту (код {response.status_code}). Попробуйте позже."

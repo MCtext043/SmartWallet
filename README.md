@@ -242,6 +242,11 @@ python test_recommendations.py
 python test_chat.py
 ```
 
+#### Тест форматирования ответов:
+```bash
+python test_chat_formatting.py
+```
+
 #### Интерактивный чат:
 ```bash
 python chat_client.py

@@ -50,7 +50,9 @@ def test_chat_api():
         
         if chat_response.status_code == 200:
             reply = chat_response.json()["reply"]
-            print(f"🤖 Ассистент: {reply}")
+            print(f"🤖 Ассистент:")
+            print(reply)
+            print("-" * 40)
         else:
             print(f"❌ Ошибка: {chat_response.status_code} - {chat_response.text}")
     
