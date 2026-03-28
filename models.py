@@ -44,6 +44,9 @@ class Transaction(Base):
     amount = Column(Float)
     category = Column(String)
     cashback_earned = Column(Float)
+    source = Column(String, default="manual", nullable=False)  # manual | import | demo
+    external_id = Column(String, nullable=True, index=True)
+    occurred_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     
     user = relationship("User", back_populates="transactions")

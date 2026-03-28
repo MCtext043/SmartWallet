@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine
+from database import engine, apply_sqlite_migrations
 from models import Base
-from routers import auth, cards, transactions, assistant, cashback
+from routers import auth, cards, transactions, assistant, cashback, demo
 
-# Создаем таблицы в базе данных
+# Создаем таблицы в базе данных и подмешиваем колонки в существующий SQLite
 Base.metadata.create_all(bind=engine)
+apply_sqlite_migrations()
 
 app = FastAPI(
     title="SmartWallet API",
@@ -28,6 +29,7 @@ app.include_router(cards.router)
 app.include_router(transactions.router)
 app.include_router(assistant.router)
 app.include_router(cashback.router)
+app.include_router(demo.router)
 
 
 @app.get("/")

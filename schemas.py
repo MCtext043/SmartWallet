@@ -64,10 +64,38 @@ class Transaction(TransactionBase):
     user_id: int
     card_id: int
     cashback_earned: float
+    source: str = "manual"
+    external_id: Optional[str] = None
+    occurred_at: Optional[datetime] = None
     created_at: datetime
     
     class Config:
         from_attributes = True
+
+
+class TransactionImportItem(BaseModel):
+    amount: float
+    category: str
+    card_last4: str
+    external_id: Optional[str] = None
+    occurred_at: Optional[datetime] = None
+
+
+class TransactionBulkImport(BaseModel):
+    items: List[TransactionImportItem]
+
+
+class TransactionBulkImportResult(BaseModel):
+    created: int
+    skipped_duplicates: int
+    errors: List[str]
+
+
+class DemoSeedResponse(BaseModel):
+    reset: bool
+    cards_created: int
+    transactions_created: int
+    recommendations_removed: int
 
 
 # Recommendation schemas

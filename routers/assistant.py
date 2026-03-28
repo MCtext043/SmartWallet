@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 import requests
+from sqlalchemy import func
 from database import get_db
 from models import User, Recommendation, Card, Transaction
 from schemas import Recommendation as RecommendationSchema
@@ -59,7 +60,9 @@ def get_user_context(current_user: User, db: Session) -> str:
     # Получаем последние транзакции
     recent_transactions = db.query(Transaction).filter(
         Transaction.user_id == current_user.id
-    ).order_by(Transaction.created_at.desc()).limit(5).all()
+    ).order_by(
+        func.coalesce(Transaction.occurred_at, Transaction.created_at).desc()
+    ).limit(5).all()
     
     context = f"Пользователь: {current_user.name}\n"
     context += f"Телефон: {current_user.phone}\n\n"
@@ -144,7 +147,9 @@ def generate_personalized_recommendations(current_user: User, db: Session) -> Li
     user_cards = db.query(Card).filter(Card.user_id == current_user.id).all()
     recent_transactions = db.query(Transaction).filter(
         Transaction.user_id == current_user.id
-    ).order_by(Transaction.created_at.desc()).limit(10).all()
+    ).order_by(
+        func.coalesce(Transaction.occurred_at, Transaction.created_at).desc()
+    ).limit(10).all()
     
     recommendations = []
     
