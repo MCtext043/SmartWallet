@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database import engine, apply_sqlite_migrations
 from models import Base
 from routers import auth, cards, transactions, assistant, cashback, demo
@@ -7,6 +10,9 @@ from routers import auth, cards, transactions, assistant, cashback, demo
 # Создаем таблицы в базе данных и подмешиваем колонки в существующий SQLite
 Base.metadata.create_all(bind=engine)
 apply_sqlite_migrations()
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+(STATIC_DIR / "avatars").mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="SmartWallet API",
@@ -22,6 +28,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Подключаем роутеры
 app.include_router(auth.router)

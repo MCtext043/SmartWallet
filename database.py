@@ -26,6 +26,11 @@ def apply_sqlite_migrations() -> None:
         if "occurred_at" not in cols:
             conn.execute(text("ALTER TABLE transactions ADD COLUMN occurred_at DATETIME"))
 
+        rows_u = conn.execute(text("PRAGMA table_info(users)")).fetchall()
+        cols_u = {r[1] for r in rows_u}
+        if cols_u and "avatar_url" not in cols_u:
+            conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR"))
+
 Base = declarative_base()
 
 

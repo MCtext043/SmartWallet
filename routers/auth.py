@@ -1,13 +1,30 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+
+from auth import (
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    get_password_hash,
+    get_user_by_phone,
+)
+from config import settings
 from database import get_db
 from models import User
 from schemas import UserCreate, UserLogin, User as UserSchema, Token
-from auth import authenticate_user, create_access_token, get_password_hash, get_user_by_phone, get_current_user
 from datetime import timedelta
-from config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+_AVATAR_DIR = Path(__file__).resolve().parent.parent / "static" / "avatars"
+_AVATAR_MAX_BYTES = 5 * 1024 * 1024
+_AVATAR_TYPES = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
 
 
 @router.post("/register", response_model=UserSchema)
@@ -59,4 +76,63 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
 
 @router.get("/profile", response_model=UserSchema)
 def get_profile(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.post(
+    "/profile/avatar",
+    response_model=UserSchema,
+    summary="Загрузка аватара",
+    responses={
+        400: {"description": "Нет файла, не изображение или превышен размер (до 5 МБ)"},
+        401: {"description": "Не авторизован"},
+    },
+)
+async def upload_profile_avatar(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    file: UploadFile | None = File(None, description="Файл изображения (jpeg, png, webp)"),
+):
+    """
+    `multipart/form-data`, поле **`file`**. Допустимы `image/jpeg`, `image/png`, `image/webp`, максимум 5 МБ.
+    В ответе — профиль с `avatar_url` (относительный путь `/static/avatars/...`).
+    """
+    if file is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ожидается multipart/form-data с полем file",
+        )
+    ct = (file.content_type or "").split(";")[0].strip().lower()
+    if ct not in _AVATAR_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Допустимы только изображения: image/jpeg, image/png, image/webp",
+        )
+    body = await file.read()
+    if not body:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пустой файл",
+        )
+    if len(body) > _AVATAR_MAX_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Размер файла не более 5 МБ",
+        )
+
+    ext = _AVATAR_TYPES[ct]
+    _AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+    for old in _AVATAR_DIR.glob(f"{current_user.id}.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+
+    out_path = _AVATAR_DIR / f"{current_user.id}{ext}"
+    out_path.write_bytes(body)
+
+    rel = f"/static/avatars/{out_path.name}"
+    current_user.avatar_url = rel
+    db.commit()
+    db.refresh(current_user)
     return current_user

@@ -32,7 +32,7 @@ echo ✅ Python найден
 echo.
 
 echo 📦 Установка зависимостей для SQLite...
-pip install fastapi uvicorn sqlalchemy python-jose[cryptography] passlib[bcrypt] python-multipart pydantic pydantic-settings python-dotenv requests
+pip install fastapi uvicorn sqlalchemy python-jose[cryptography] "bcrypt>=4.1.0,<5" python-multipart pydantic pydantic-settings python-dotenv requests
 if errorlevel 1 (
     echo ❌ Ошибка установки зависимостей
     pause

@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     name = Column(String)
     password_hash = Column(String)
+    avatar_url = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     
     cards = relationship("Card", back_populates="owner")
