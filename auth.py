@@ -9,7 +9,13 @@ from config import settings
 from database import get_db
 from models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+#
+# NOTE:
+# В текущем окружении пакет `bcrypt` несовместим с установленной версией `passlib`
+# и хеширование на схеме `bcrypt` падает с `ValueError`.
+# Чтобы сервер не отдавал 500 при регистрации/логине, используем `pbkdf2_sha256`.
+#
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 security = HTTPBearer()
 
 

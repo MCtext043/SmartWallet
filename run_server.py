@@ -1,7 +1,7 @@
 """
 SmartWallet API Server
 Простой запуск сервера для работы в сети
-База данных: SQLite (не требует установки)
+База данных: PostgreSQL
 """
 import uvicorn
 import socket

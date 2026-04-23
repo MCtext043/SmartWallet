@@ -1,11 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine
-from models import Base
 from routers import auth, cards, transactions, assistant, cashback
-
-# Создаем таблицы в базе данных
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="SmartWallet API",

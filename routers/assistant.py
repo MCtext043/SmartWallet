@@ -103,7 +103,7 @@ def chat_with_assistant(
         
         # Отправляем запрос к GigaChat API
         response = requests.post(
-            "https://derendyaev.ru/api/gigachat/message",
+            "http://91.146.28.240:8041/api/gigachat/message",
             json={
                 "model": "GigaChat:latest",
                 "stream": False,

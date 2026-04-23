@@ -1,257 +1,171 @@
-# 🚀 SmartWallet Backend API
+# SmartWallet Backend API
 
-Backend для приложения SmartWallet - автоматический поиск карты с лучшим кэшбэком для оплаты.
+Backend-сервис для SmartWallet: управление картами, транзакциями, подбор лучшей карты по категории кэшбэка и рекомендации ассистента.
 
-## ⚡ БЫСТРЫЙ ЗАПУСК (для пользователей)
+## О проекте
 
-1. **Скачайте архив** `SmartWallet_API.zip`
-2. **Распакуйте** в любую папку
-3. **Запустите** `ЗАПУСК.bat`
-4. **Готово!** API работает на http://localhost:8000
+`SmartWallet Backend` — API-слой приложения, который:
+- хранит пользователей, карты и транзакции;
+- рассчитывает/подбирает наиболее выгодную карту по категории трат;
+- отдает рекомендации через ассистента.
 
-📖 **Подробная инструкция**: `ИНСТРУКЦИЯ.txt`
+Цель проекта: предоставить мобильному/веб-клиенту единый backend с авторизацией, бизнес-логикой и доступом к данным.
 
-## Технологии
+## Что внутри
 
-- **FastAPI** - современный веб-фреймворк для создания API
-- **SQLite** - встроенная база данных (не требует установки)
-- **SQLAlchemy** - ORM для работы с базой данных
-- **JWT** - аутентификация
-- **Pydantic** - валидация данных
+- FastAPI-приложение с модульными роутерами
+- JWT-аутентификация и доступ к защищенным endpoint-ам
+- SQLAlchemy ORM + PostgreSQL
+- Pydantic-схемы для валидации запросов/ответов
 
-## Установка и запуск
+## Архитектура
 
-### 1. Установка зависимостей
+Проект разделен по слоям:
+
+- `main.py` - точка входа, инициализация приложения, CORS, подключение роутеров
+- `config.py` - конфигурация из переменных окружения
+- `database.py` - подключение к БД и сессии
+- `models.py` - SQLAlchemy-модели
+- `schemas.py` - Pydantic-схемы DTO
+- `auth.py` - логика аутентификации, токены и защита endpoint-ов
+- `routers/` - HTTP API по доменам:
+  - `auth.py`
+  - `cards.py`
+  - `transactions.py`
+  - `assistant.py`
+  - `cashback.py`
+
+## Основные endpoint-ы
+
+- `GET /` - сервисная информация
+- `GET /health` - проверка доступности сервиса
+- `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`
+- `GET/POST /cards`, `GET /cards/{id}`
+- `GET/POST /transactions`
+- `GET /assistant/recommendations`, `POST /assistant/chat`
+- `GET /cashback/best-card?category=...`
+
+Интерактивная спецификация: `http://localhost:8000/docs`
+
+## Требования
+
+- Python 3.10+
+- `pip`
+- PostgreSQL 14+ (или запуск через `docker compose`)
+
+## Запуск локально (PostgreSQL)
+
+1. Установить зависимости:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Настройка базы данных
+2. Поднять PostgreSQL и создать БД `smartwallet` (пример для локальной БД):
 
-**SQLite не требует установки!** База данных создается автоматически при первом запуске.
+```sql
+CREATE DATABASE smartwallet;
+```
 
-Файл `.env` не обязателен, но можно создать для кастомизации:
+3. Настроить `.env`:
+
 ```env
-DATABASE_URL=sqlite:///./smartwallet.db
-SECRET_KEY=your-secret-key-here
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/smartwallet
+SECRET_KEY=change-me
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-### 3. Запуск приложения
+4. Инициализировать таблицы и тестовые данные:
 
-#### Вариант 1: Автоматический запуск (рекомендуется)
-1. Дважды кликните на `ЗАПУСК.bat`
-2. Всё настроится автоматически!
-
-#### Вариант 2: Через PyCharm
-1. Откройте файл `run_server.py`
-2. Нажмите **Ctrl+Shift+F10** (Run 'run_server')
-
-#### Вариант 3: Через командную строку
-```bash
-python init_db.py  # Создание базы данных
-python run_server.py  # Запуск сервера
-```
-
-#### Вариант 4: Стандартный способ
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### 4. Доступ к API
-
-После запуска сервер будет доступен по адресам:
-- **Локально**: http://localhost:8000
-- **В сети**: http://[ВАШ_IP]:8000 (IP будет показан в консоли)
-- **Документация**: http://[ВАШ_IP]:8000/docs
-
-### 5. Доступ с других устройств
-
-1. **Узнайте IP адрес** вашего компьютера (показан в консоли при запуске)
-2. **Убедитесь, что порт 8000 открыт** в брандмауэре Windows
-3. **Подключитесь с другого устройства** по адресу: `http://[IP]:8000`
-
-#### Настройка брандмауэра Windows:
-1. Откройте **Панель управления** → **Система и безопасность** → **Брандмауэр Windows**
-2. Нажмите **"Разрешить взаимодействие с приложением"**
-3. Найдите **Python** и разрешите для **частной и общедоступной сети**
-4. Или добавьте правило для порта **8000**
-
-## API Endpoints
-
-### Аутентификация
-- `POST /auth/register` - Регистрация пользователя
-- `POST /auth/login` - Вход в систему
-- `GET /auth/profile` - Получить профиль пользователя
-
-### Карты
-- `GET /cards` - Список карт пользователя
-- `POST /cards` - Добавить карту
-- `GET /cards/{id}` - Детали карты
-
-### Транзакции
-- `GET /transactions` - История транзакций
-- `POST /transactions` - Создать транзакцию
-
-### Ассистент
-- `GET /assistant/recommendations` - Получить персонализированные рекомендации
-- `POST /assistant/chat` - Чат с AI ассистентом
-
-### Кэшбэк
-- `GET /cashback/best-card?category=еда` - Найти лучшую карту для категории
-
-## Структура базы данных
-
-### Таблица users
-- `id` - ID пользователя
-- `phone` - Телефон
-- `email` - Email
-- `name` - Имя
-- `password_hash` - Хэш пароля
-- `created_at` - Дата регистрации
-
-### Таблица cards
-- `id` - ID карты
-- `user_id` - Владелец карты
-- `bank_name` - Название банка
-- `card_name` - Название карты
-- `last4` - Последние 4 цифры
-- `cashback_rules` - Правила кэшбэка (JSON)
-- `limit_monthly` - Месячный лимит кэшбэка
-- `created_at` - Дата добавления
-
-### Таблица transactions
-- `id` - ID транзакции
-- `user_id` - Пользователь
-- `card_id` - Карта
-- `amount` - Сумма
-- `category` - Категория
-- `cashback_earned` - Заработанный кэшбэк
-- `created_at` - Дата транзакции
-
-### Таблица recommendations
-- `id` - ID рекомендации
-- `user_id` - Пользователь
-- `message` - Текст рекомендации
-- `type` - Тип ("совет" / "акция")
-- `created_at` - Дата создания
-
-## Примеры использования
-
-### Регистрация пользователя
-```bash
-curl -X POST "http://localhost:8000/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "+79001234567",
-    "email": "user@example.com",
-    "name": "Иван Иванов",
-    "password": "password123"
-  }'
-```
-
-### Добавление карты
-```bash
-curl -X POST "http://localhost:8000/cards" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "bank_name": "Сбербанк",
-    "card_name": "Сбербанк Премьер",
-    "last4": "1234",
-    "cashback_rules": {"еда": 5, "транспорт": 3, "прочее": 1},
-    "limit_monthly": 5000.00
-  }'
-```
-
-### Создание транзакции
-```bash
-curl -X POST "http://localhost:8000/transactions" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "card_id": 1,
-    "amount": 1000.00,
-    "category": "еда"
-  }'
-```
-
-### Поиск лучшей карты для категории
-```bash
-curl -X GET "http://localhost:8000/cashback/best-card?category=еда" \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
-
-### Чат с AI ассистентом
-```bash
-curl -X POST "http://localhost:8000/assistant/chat" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Привет, подскажи лучший кэшбэк на еду?"}'
-```
-
-## Разработка
-
-### Структура проекта
-```
-├── main.py                 # Главный файл приложения
-├── config.py              # Конфигурация
-├── database.py            # Настройка базы данных
-├── models.py              # SQLAlchemy модели
-├── schemas.py             # Pydantic схемы
-├── auth.py                # Аутентификация
-├── routers/               # API роутеры
-│   ├── auth.py           # Аутентификация
-│   ├── cards.py          # Карты
-│   ├── transactions.py   # Транзакции
-│   ├── assistant.py      # Рекомендации
-│   └── cashback.py       # Кэшбэк
-├── requirements.txt       # Зависимости
-├── test_chat.py          # Тест чата с ассистентом
-├── test_recommendations.py # Тест персонализированных рекомендаций
-├── chat_client.py        # Клиент для чата
-└── README.md             # Документация
-```
-
-### База данных SQLite
-
-База данных SQLite создается автоматически при первом запуске в файле `smartwallet.db`.
-
-Для создания тестовых данных:
 ```bash
 python init_db.py
 ```
 
-База данных будет содержать:
-- Тестового пользователя
-- Примеры карт с правилами кэшбэка
-- Тестовые транзакции
-- Рекомендации
+5. Запустить сервис:
 
-### Тестирование ассистента
-
-#### Тест персонализированных рекомендаций:
 ```bash
-python test_recommendations.py
+python run_server.py
 ```
 
-#### Тест чата с AI:
+Альтернатива:
+
 ```bash
-python test_chat.py
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-#### Тест форматирования ответов:
-```bash
-python test_chat_formatting.py
+## Переменные окружения
+
+Поддерживаемые параметры (`.env`, опционально):
+
+```env
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/smartwallet
+SECRET_KEY=change-me
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-#### Интерактивный чат:
+## Docker
+
+Запуск API + PostgreSQL:
+
 ```bash
-python chat_client.py
+docker compose up --build
 ```
 
-Тестовые данные для авторизации:
-- **Телефон**: +79001234567
-- **Пароль**: password123
+После запуска API доступно на `http://localhost:8000`, PostgreSQL - на `localhost:5432`.
+
+## Миграции (Alembic)
+
+Применить миграции:
+
+```bash
+python -m alembic upgrade head
+```
+
+Создать новую миграцию после изменения моделей:
+
+```bash
+python -m alembic revision --autogenerate -m "describe_changes"
+```
+
+## Структура репозитория
+
+```text
+.
+|-- main.py
+|-- config.py
+|-- database.py
+|-- models.py
+|-- schemas.py
+|-- auth.py
+|-- requirements.txt
+|-- run_server.py
+|-- init_db.py
+|-- alembic.ini
+|-- alembic/
+|   |-- env.py
+|   `-- versions/
+|       `-- 0001_initial_schema.py
+|-- routers/
+|   |-- auth.py
+|   |-- cards.py
+|   |-- transactions.py
+|   |-- assistant.py
+|   `-- cashback.py
+|-- tests/
+|   |-- test_backend_happy_path.py
+|   |-- test_chat.py
+|   |-- test_chat_formatting.py
+|   `-- test_recommendations.py
+|-- tools/
+|   |-- chat_client.py
+|   |-- improved_recommendations_example.py
+|   `-- verify_register.py
+`-- README.md
+```
+
+## Примечание
+
+- `smartwallet.db` больше не используется: проект переведен на PostgreSQL.
+- Инициализация БД выполняется через миграции Alembic (`python -m alembic upgrade head`).
